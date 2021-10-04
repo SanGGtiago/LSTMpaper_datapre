@@ -48,21 +48,20 @@ def save_data(file_name, mf):
     q.to_csv('Q_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
     B_baseline.to_csv('B_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
 
-def auto_read(filepath, name):
+def auto_read(data_path, namelist):
     all_r = []
-    for item in name:
-        R = read_data_amazon(filepath + item)
+    for item in namelist:
+        R = read_data_amazon(data_path + item)
         all_r.append(R)
-
     return all_r
 
-data_path = os.getcwd() + '/MF_lstm_datapreprocess/amazon/'
+data_path = os.getcwd() + '/amazon/'
 
 #data_path = os.getcwd() + '/Data/100k
 # /accumulate/'
 
-first = read_data_amazon(data_path + 'amazon_mon1.csv')
-print(first.shape)
+# first = read_data_amazon(data_path + 'amazon_mon1.csv')
+# print(first.shape)
 namelist_amazon = ['amazon_mon2.csv', 'amazon_mon3.csv', 'amazon_mon4.csv', 'amazon_mon5.csv', 'amazon_mon6.csv', 'amazon_mon7.csv', 'amazon_mon8.csv', 'amazon_mon9.csv', 'amazon_mon10.csv', 'amazon_mon11.csv', 'amazon_mon12.csv', 'amazon_mon13.csv', 'amazon_mon14.csv', 'amazon_mon15.csv']
 
 R = auto_read(data_path, namelist_amazon)
