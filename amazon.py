@@ -48,28 +48,36 @@ def save_data(file_name, mf):
     q.to_csv('Q_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
     B_baseline.to_csv('B_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
 
+def save_rating(file_name, mf):
+    matrix = mf.full_matrix()
+    np.save('amazon-result-test/'+file_name, matrix)
+
 def auto_read(data_path, namelist):
     all_r = []
     for item in namelist:
-        R = read_data_amazon(data_path + item)
+        R = read_data_amazon(data_path + item + ".csv")
         all_r.append(R)
     return all_r
 
 data_path = os.getcwd() + '/amazon/'
 
-#data_path = os.getcwd() + '/Data/100k
-# /accumulate/'
-
 first = read_data_amazon(data_path + 'amazon_mon1.csv')
-print(first.shape)
-namelist_amazon = ['amazon_mon2.csv', 'amazon_mon3.csv', 'amazon_mon4.csv', 'amazon_mon5.csv', 'amazon_mon6.csv', 'amazon_mon7.csv', 'amazon_mon8.csv', 'amazon_mon9.csv', 'amazon_mon10.csv', 'amazon_mon11.csv', 'amazon_mon12.csv', 'amazon_mon13.csv', 'amazon_mon14.csv', 'amazon_mon15.csv']
+print(first.shape) #####去掉.csv 在下面加
+namelist_amazon = ['amazon_mon2', 'amazon_mon3', 'amazon_mon4', 'amazon_mon5', 'amazon_mon6', 'amazon_mon7', 'amazon_mon8', 'amazon_mon9', 'amazon_mon10', 'amazon_mon11', 'amazon_mon12', 'amazon_mon13', 'amazon_mon14', 'amazon_mon15']
 
 R = auto_read(data_path, namelist_amazon)
 start = time.time()
-mf_b = MF_b(first, K=300, alpha=0.01, beta=0.001, iterations=500)
+mf_b = MF_b(first, K=300, alpha=0.01, beta=0.001, iterations=1000)
 training_process = mf_b.train()
 save_data('amazon_mon1.csv', mf_b)
-
+save_rating('amazon_mon1.csv', mf_b)
+############single_train
 for index, item in enumerate(namelist_amazon):
-    mf_b.singletrain(R[index], 200)
+    mf_b.singletrain(R[index], 300)
+    save_rating(item, mf_b)
     save_data(item, mf_b)
+############ori_train
+# for index, item in enumerate(namelist_amazon):
+#     mf_b = MF_b(R[index], K=300, alpha=0.01, beta=0.001, iterations=500)
+#     training_process = mf_b.train()
+#     save_rating(item, mf_b)
