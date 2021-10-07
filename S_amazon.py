@@ -44,9 +44,9 @@ def save_data(file_name, mf):
     #PQ = pd.concat([p, q], axis = 1)
     B_baseline = pd.concat([bu_, bi_, b_], axis = 1)
     ############P QB 或 P Q B
-    p.to_csv('P_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
-    q.to_csv('Q_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
-    B_baseline.to_csv('B_'+file_name, sep='\n', index=False, header=False, float_format='%.5f')
+    p.to_csv('P_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
+    q.to_csv('Q_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
+    B_baseline.to_csv('B_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
 
 def save_rating(file_name, mf):
     matrix = mf.full_matrix()
@@ -69,11 +69,11 @@ R = auto_read(data_path, namelist_amazon)
 start = time.time()
 mf_b = MF_b(first, K=300, alpha=0.01, beta=0.001, iterations=1000)
 training_process = mf_b.train()
-save_data('amazon_mon1.csv', mf_b)
-save_rating('amazon_mon1.csv', mf_b)
+save_data('amazon_mon1', mf_b)
+save_rating('amazon_mon1', mf_b)
 ############single_train
 for index, item in enumerate(namelist_amazon):
-    mf_b.singletrain(R[index], 300)
+    mf_b.singletrain(R[index], 100)
     save_rating(item, mf_b)
     save_data(item, mf_b)
 ############ori_train

@@ -90,7 +90,7 @@ def min(ori, _):
 list_ = [300]
 V_lstm = []
 V_lstm_delta = []
-dataset = "amazon"
+dataset = "1M"
 # D = [1.014014975, 0.9965458088, 0.9897703265, 0.9911442422, 0.9925687081]
 # D1 = [1.01407542, 0.9965985365, 0.9891604569, 0.9905492221, 0.9945555019]
 # D2 = [1.013876322, 0.9966166909, 0.9889331608, 0.987998119, 0.9928028801]
@@ -98,12 +98,12 @@ dataset = "amazon"
 for i, k in enumerate(list_):
     ori_path = f'{dataset}-oriresult-mf{k}k_500iter/'
     single_path = f'{dataset}-result-single{k}k_500_200iter/'
-    ori_mf = np.load(ori_path + dataset +'_mon7.csv.npy')
-    singletrain_mf = np.load(single_path + dataset + '_mon7.csv.npy')
-    ori = read_data(f'{dataset}/' + dataset + '_mon7.csv')
+    ori_mf = np.load(ori_path + dataset +'_mon10.csv.npy')
+    singletrain_mf = np.load(single_path + dataset + '_mon10.csv.npy')
+    ori = read_data(f'{dataset}/' + dataset + '_mon10.csv')
     next_month = read_data(f'{dataset}/' + dataset + '_mon15.csv')
-    first = check_dif(ori, next_month)
 
+    first = check_dif(ori, next_month)
     ori_mf = clean_dif(ori, ori_mf)
     singletrain_mf = clean_dif(ori, singletrain_mf)
 
@@ -118,8 +118,8 @@ for i, k in enumerate(list_):
     for i in range(ori.shape[0]):
         if np.count_nonzero(first[i]) >= 50:
             count = count + 1
-            orindcg = orindcg + ndcg_score([list(first[i])], [list(ori_mf[i])], k=20)
-            singlendcg = singlendcg + ndcg_score([list(first[i])], [list(singletrain_mf[i])], k=20)
+            orindcg = orindcg + ndcg_score(np.asarray([first[i]]), np.asarray([ori_mf[i]]), k=30)
+            singlendcg = singlendcg + ndcg_score(np.asarray([first[i]]), np.asarray([singletrain_mf[i]]), k=30)
     print(next_month[0], singletrain_mf[0])
     print(np.count_nonzero(next_month[0]), np.count_nonzero(singletrain_mf[0]))
     print(orindcg/count, singlendcg/count, count)
@@ -133,6 +133,7 @@ for i, k in enumerate(list_):
 
     ####################################### R #######################################################
     ####################################### R #######################################################
+    
     # single = ori-(single-ori)  ###############100k fox
     # single = single*D2[i]
     
