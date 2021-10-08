@@ -44,13 +44,13 @@ def save_data(file_name, mf):
 
     #PQ = pd.concat([p, q], axis = 1)
     B_baseline = pd.concat([bu_, bi_, b_], axis = 1)
-    p.to_csv(dataset+'-result/P_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
-    q.to_csv(dataset+'-result/Q_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
-    B_baseline.to_csv(dataset+'-result/B_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
+    p.to_csv(dataset+f'-{mode}result/P_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
+    q.to_csv(dataset+f'-{mode}result/Q_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
+    B_baseline.to_csv(dataset+f'-{mode}result/B_'+file_name+'.csv', sep='\n', index=False, header=False, float_format='%.5f')
 
 def save_rating(file_name, mf):
     matrix = mf.full_matrix()
-    np.save(dataset+'-result/'+file_name, matrix)
+    np.save(dataset+f'-{mode}result/'+file_name, matrix)
 def auto_read(filepath, name):
     all_r = []
     for item in name:
@@ -60,7 +60,9 @@ def auto_read(filepath, name):
     return all_r
 
 
-dataset = '1M'
+dataset = '100k'
+mode = 'ori' # model = ''
+
 file_path = glob.glob(f'{dataset}/*.csv')
 first = read_data(file_path[0])
 start = time.time()
@@ -70,18 +72,18 @@ training_process = mf_b.train()
 save_data(dataset+'_mon1', mf_b)
 save_rating(dataset+'_mon1', mf_b)
 ############single_train
-for i, file_name in enumerate(file_path[1:]):
-    data = read_data(file_name)
-    mf_b.singletrain(data, 150)
-    save_rating(f'{dataset}_mon{i}', mf_b)
-    save_data(f'{dataset}_mon{i}', mf_b)
+# for i, file_name in enumerate(file_path[1:]):
+#     data = read_data(file_name)
+#     mf_b.singletrain(data, 150)
+#     save_rating(f'{dataset}_mon{i}', mf_b)
+#     save_data(f'{dataset}_mon{i}', mf_b)
 
 ############ori_train
-# for index, item in enumerate(namelist_amazon):
-#     mf_b = MF_b(R[index], K=300, alpha=0.01, beta=0.001, iterations=500)
-#     training_process = mf_b.train()
-#     save_rating(item, mf_b)
-
-
+for i, file_name in enumerate(file_path[1:]):
+    data = read_data(file_name)
+    mf_b = MF_b(data, K=300, alpha=0.01, beta=0.001, iterations=500)
+    training_process = mf_b.train()
+    save_rating(f'{dataset}_mon{i}', mf_b)
+    save_data(f'{dataset}_mon{i}', mf_b)
 
 ###################################################
