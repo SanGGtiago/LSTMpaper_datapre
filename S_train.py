@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from MF_b_improve import MF_b
+from Z_MF_b_improve import MF_b
 
 import glob
 import pandas as pd
@@ -61,12 +61,12 @@ def auto_read(filepath, name):
 
 
 dataset = '100k'
-mode = 'ori' # model = ''
+mode = 'ori' # model = '' || 'ori'
 
 file_path = glob.glob(f'{dataset}/*.csv')
 first = read_data(file_path[0])
 start = time.time()
-mf_b = MF_b(first, K=300, alpha=0.01, beta=0.001, iterations=1000)
+mf_b = MF_b(first, K=300, alpha=0.01, beta=0.001, iterations=500)
 training_process = mf_b.train()
 
 save_data(dataset+'_mon1', mf_b)
@@ -79,11 +79,11 @@ save_rating(dataset+'_mon1', mf_b)
 #     save_data(f'{dataset}_mon{i}', mf_b)
 
 ############ori_train
-for i, file_name in enumerate(file_path[1:]):
-    data = read_data(file_name)
-    mf_b = MF_b(data, K=300, alpha=0.01, beta=0.001, iterations=500)
-    training_process = mf_b.train()
-    save_rating(f'{dataset}_mon{i}', mf_b)
-    save_data(f'{dataset}_mon{i}', mf_b)
+# for i, file_name in enumerate(file_path[1:]):
+#     data = read_data(file_name)
+#     mf_b = MF_b(data, K=300, alpha=0.01, beta=0.001, iterations=500)
+#     training_process = mf_b.train()
+#     save_rating(f'{dataset}_mon{i}', mf_b)
+#     save_data(f'{dataset}_mon{i}', mf_b)
 
 ###################################################
