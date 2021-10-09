@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import ndcg_score
+from collections import defaultdict
 
 def read_data(filename):
     df = pd.read_csv(filename,
@@ -24,29 +25,11 @@ def rate_rmse(predict, ori):
 
     return np.sqrt(error/len(xs))
 
-def recall(predict, ori):
-    """
-    A function to compute the total mean square error
-    """
-    xs, ys = ori.nonzero()
-    fn = 0
-    tp = 0
-    for x, y in zip(xs, ys):
-        error += pow(ori[x, y] - predict[x, y], 2)
+def get_top_n(predictions, k):
+    #np.array([9,1,3,4,8,7,2,5,6,0])
+    temp = np.argpartition(predictions, -k)[-k:]
 
-    return np.sqrt(error/len(xs))
-
-def precision(predict, ori):
-    """
-    A function to compute the total mean square error
-    """
-    xs, ys = ori.nonzero()
-    fp = 0
-    tp = 0
-    for x, y in zip(xs, ys):
-        error += pow(ori[x, y] - predict[x, y], 2)
-
-    return np.sqrt(error/len(xs))
+    return temp
 
 def check_dif(ori, next_month):
 
@@ -74,31 +57,6 @@ def approximate(mon):
 
     return mon
 
-
-
-def show_V_delta(V_lstm, V_lstm_delta):
-
-    labels = ['100', '150', '200', '250', '300']
-
-    x = np.arange(len(labels))  # the label locations
-    width = 0.3  # the width of the bars
-
-    fig, ax = plt.subplots()
-    # ax.set_ylim([1.0, 1.1])   ##########100k
-    # ax.set_ylim([1.05, 1.22])   ##########foxconn
-    ax.set_ylim([0.5, 2.2])   ##########1M
-    ax.bar(x - width/2, V_lstm, width, label='Flstm(withoutΔ)')
-    ax.bar(x + width/2, V_lstm_delta, width, label='Flstm')
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('RMSE')
-    ax.set_xlabel('d')
-    ax.set_title('FLSTM:ELR Model(1M)')
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.legend()
-    fig.tight_layout()
-    plt.show()
-
 def min(ori, _):
     for i in range(len(ori)):
         m = ori[i] - _[i]
@@ -106,68 +64,91 @@ def min(ori, _):
     return ori 
 
     ####################################### NDCG #######################################################
-def ndcg():
+def ndcg(TD, OD, PD, k, num):
+    #num是資料裡電影數大於的數目
     count = 0
     orindcg = 0
     singlendcg = 0
-    for i in range(ori.shape[0]):
-        if np.count_nonzero(first[i]) >= 50:
+    for i in range(TD.shape[0]):
+        if np.count_nonzero(TD[i]) >= num:
             count = count + 1
-            orindcg = orindcg + ndcg_score(np.asarray([first[i]]), np.asarray([ori_mf[i]]), k=10)
-            singlendcg = singlendcg + ndcg_score(np.asarray([first[i]]), np.asarray([singletrain_mf[i]]), k=10)
+            orindcg = orindcg + ndcg_score(np.asarray([TD[i]]), np.asarray([OD[i]]), k=k)
+            singlendcg = singlendcg + ndcg_score(np.asarray([TD[i]]), np.asarray([PD[i]]), k=k)
     print(orindcg/count, singlendcg/count, count)
     return 0
     ####################################### NDCG #######################################################
 
     ####################################### H #######################################################
+def hit(TD, POD, k, num):
+    #num是資料裡電影數大於的數目 , 時間複雜度要修改
+    hit = 0
+    check = 0
+    for i in range(TD.shape[0]):
+        if np.count_nonzero(TD[i]) >= num:
+            T = get_top_n(TD[i], k)
+            for item in T:
+                error = abs(TD[i, item] - POD[i, item])    
+                if error < 0.5:
+                    hit+=1
+                    check +=1
+                else:
+                    check +=1
+    print(hit/check)
+    return 0
     ####################################### H #######################################################
 
-    ####################################### P #######################################################
-    ####################################### P #######################################################
-
-    ####################################### R #######################################################
-def rmse():
-    ori_rmse = rate_rmse(ori_mf, first)
-    single_rmse = rate_rmse(singletrain_mf, first)
-    print(ori_rmse, single_rmse)
+    ####################################### PR #######################################################
+def P_R(TD, POD, k, num):
+    #num是資料裡電影數大於的數目 , 時間複雜度要修改
+    usercount = 0
+    TP = 0
+    FN = 0
+    FP = 0
+    check = 0
+    for i in range(TD.shape[0]):
+        if np.count_nonzero(TD[i]) >= num:
+            usercount = usercount + 1
+            T = get_top_n(TD[i], k)
+            P = get_top_n(POD[i], k)
+            for Titem in T:
+                for j in range(10):
+                    if Titem == P[j]:
+                        TP = TP + 1
+                        check = 1
+                if check == 0: FN = FN +1
+                check = 0
+            check = 0
+            for Pitem in P:
+                for j in range(10):
+                    if Pitem == T[j]:
+                        check = 1
+                if check == 0: FP = FP +1
+                check = 0
+    print(TP, FN, FP)
+    print('P:',TP/(TP+FP), '   R:',+TP/(TP+FN))
     return 0
-    ####################################### R #######################################################
+    ####################################### PR #######################################################
 
-
-# for i in range(15, 36):
-#     data_path1 = '1M-data/'
-#     ori = read_data(data_path1 + f'a{i}.tsv')
-#     next_month = read_data(data_path1 + f'a{i+1}.tsv')
-#     first = check_dif(ori, next_month)
-#     print(rate_rmse(ori_mf, first), rate_rmse(singletrain_mf, first))
 list_ = [300]
 V_lstm = []
 V_lstm_delta = []
-dataset = "fox"
+dataset = "amazon"
 
 for i, k in enumerate(list_):
-    ori_mf = np.load(f'{dataset}-oriresult/' + dataset +'_mon3.npy')
-    singletrain_mf = np.load(f'{dataset}-singleresult/' + dataset + '_mon3.npy')
-    ori = read_data(f'{dataset}/' + dataset + '_mon3.csv')
-    next_month = read_data(f'{dataset}/' + dataset + '_mon8.csv')
+    ori_mf = np.load(f'{dataset}-oriresult/' + dataset +'_mon10.npy')
+    singletrain_mf = np.load(f'{dataset}-singleresult/' + dataset + '_mon10.npy')
+    ori = read_data(f'{dataset}/' + dataset + '_mon10.csv')
+    next_month = read_data(f'{dataset}/' + dataset + '_mon15.csv')
 
     first = check_dif(ori, next_month)
     ori_mf = clean_dif(ori, ori_mf)
     singletrain_mf = clean_dif(ori, singletrain_mf)
 
-    rmse()
+    ndcg(first, ori_mf, singletrain_mf, 50, 50)
+    # hit(first, ori_mf, 10, 50)
+    # hit(first, singletrain_mf, 10, 50)
+    # P_R(first, ori_mf, 10, 50)
+    # P_R(first, singletrain_mf, 10, 50)
 
-    # print(ori_mf.shape, singletrain_mf.shape, first.shape, next_month.shape)
-    # ori = rate_rmse(ori_mf, first)
-    # single = rate_rmse(singletrain_mf, first)
-    # month = approximate(singletrain_mf)
-
-    # single = ori-(single-ori)  ###############100k fox
-    # single = single*D2[i]
-    
-    # print(ori, single, orindcg, singlendcg)
-    # V_lstm.append(ori)
-    # V_lstm_delta.append(single)
-# show_V_delta(V_lstm, V_lstm_delta)
 
 
