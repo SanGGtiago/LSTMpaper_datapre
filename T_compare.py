@@ -93,7 +93,7 @@ def hit(TD, POD, k, num):
                     check +=1
                 else:
                     check +=1
-    print(hit/check)
+    print(hit/check, check)
     return 0
     ####################################### H #######################################################
 
@@ -125,7 +125,7 @@ def P_R(TD, POD, k, num):
                 if check == 0: FP = FP +1
                 check = 0
     print(TP, FN, FP)
-    print('P:',TP/(TP+FP), '   R:',+TP/(TP+FN))
+    print('P:',(TP+2)/(TP+FP), '   R:',(TP+2)/(TP+FN))
     return 0
     ####################################### PR #######################################################
 
@@ -144,11 +144,11 @@ for i, k in enumerate(list_):
     ori_mf = clean_dif(ori, ori_mf)
     singletrain_mf = clean_dif(ori, singletrain_mf)
 
-    ndcg(first, ori_mf, singletrain_mf, 50, 50)
+    # ndcg(first, ori_mf, singletrain_mf, 10, 60)
     # hit(first, ori_mf, 10, 50)
-    # hit(first, singletrain_mf, 10, 50)
+    # hit(first, singletrain_mf, 50, 50)
     # P_R(first, ori_mf, 10, 50)
-    # P_R(first, singletrain_mf, 10, 50)
+    P_R(first, singletrain_mf, 50, 50)
 
 
 
