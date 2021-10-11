@@ -11,13 +11,12 @@ def convert():
         df.to_csv(f'O-caser-dataset/{dataset}_mon{i}.txt', sep=' ', index=False, header=False, float_format='%.5f')
 
 def del_same():
-    dataset = '100k'
-    i = 3
-    j = 8
-    F = pd.read_csv(f'O-caser-dataset/{dataset}_mon{i}.txt', sep=',', names=['user','item','rate','time'], engine='python', encoding='latin-1')
-    S = pd.read_csv(f'O-caser-dataset/{dataset}_mon{j}.txt', sep=',', names=['user','item','rate','time'], engine='python', encoding='latin-1')
-    df = pd.concat([F, S])
-    df = df.drop_duplicates(keep=False)
+    dataset = '1M'
+    i = 10
+    j = 15
+    F = pd.read_csv(f'O-caser-dataset/{dataset}_mon{i}.txt', sep=' ', names=['user','item','rate','time'], engine='python', encoding='latin-1')
+    S = pd.read_csv(f'O-caser-dataset/{dataset}_mon{j}.txt', sep=' ', names=['user','item','rate','time'], engine='python', encoding='latin-1')
+    df = pd.concat([F, S]).drop_duplicates().reset_index(drop=True)
     df.to_csv(f'O-caser-dataset/{dataset}_test.txt', sep=' ', index=False, header=False, float_format='%.5f')
 
 del_same()
